@@ -51,7 +51,12 @@ class Scheduler:
         """
         :return: True caso a profundidade for menor que a maxima e a url não foi descoberta ainda. False caso contrário.
         """
-        return False
+        domain = Domain(obj_url.hostname, self.TIME_LIMIT_BETWEEN_REQUESTS)
+        value = self.dic_url_per_domain.get(domain)
+        if value is not None:
+            if (obj_url, depth) in value:
+                return False
+        return depth < self.depth_limit
 
     @synchronized
     def add_new_page(self, obj_url: ParseResult, depth: int) -> bool:
@@ -62,8 +67,15 @@ class Scheduler:
         :return: True caso a página foi adicionada. False caso contrário
         """
         # https://docs.python.org/3/library/urllib.parse.html
-
-        return False
+        if not self.can_add_page(obj_url, depth):
+            return False
+        domain = Domain(obj_url.hostname, self.TIME_LIMIT_BETWEEN_REQUESTS)
+        if not (domain in self.dic_url_per_domain):
+            self.dic_url_per_domain[domain] = [(obj_url, depth)]
+        else:
+            self.dic_url_per_domain[domain].append((obj_url, depth))
+        self.set_discovered_urls.add(obj_url.geturl())
+        return True
 
     @synchronized
     def get_next_url(self) -> tuple:
@@ -71,6 +83,13 @@ class Scheduler:
         Obtém uma nova URL por meio da fila. Essa URL é removida da fila.
         Logo após, caso o servidor não tenha mais URLs, o mesmo também é removido.
         """
+        for domain in self.dic_url_per_domain.keys():
+            if domain.is_accessible():
+                if len(self.dic_url_per_domain[domain]) > 0:
+                    domain.accessed_now()
+                    url = self.dic_url_per_domain[domain].pop(0)
+                    return url
+        sleep(self.TIME_LIMIT_BETWEEN_REQUESTS)           
         return None, None
 
     def can_fetch_page(self, obj_url: ParseResult) -> bool:
