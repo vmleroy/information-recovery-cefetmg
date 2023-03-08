@@ -26,15 +26,15 @@ class PageFetcher(Thread):
         """
         soup = BeautifulSoup(bin_str_content, features="lxml")
         for link in soup.select("body a"):
-            if not link.has_attr("href"):
+            if not link.has_attr('href'):
                 continue
-            obj_new_url = link["href"]
-            if("://" not in obj_new_url):
-                obj_new_url = f'{obj_url.scheme}://{obj_url.hostname}/{obj_new_url}'
+            href = link['href']
+            if "://" not in href:
+                href = urljoin(obj_url.geturl(), href)
             new_depth = depth + 1
-            if obj_url.hostname not in obj_new_url:
+            if obj_url.hostname not in href:
                 new_depth = 0
-            yield urlparse(obj_new_url), new_depth
+            yield urlparse(href), new_depth
 
     def crawl_new_url(self):
         """
