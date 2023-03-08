@@ -15,7 +15,7 @@ class Domain:
         self.time_last_access = datetime.now()
 
     def is_accessible(self) -> bool:
-        if self.time_since_last_access.seconds >= self.time_limit_seconds:
+        if self.time_since_last_access.total_seconds() >= self.time_limit_seconds:
             return True
         return False
 

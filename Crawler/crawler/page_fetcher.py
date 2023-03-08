@@ -1,7 +1,7 @@
 from typing import Optional
 
 from bs4 import BeautifulSoup
-from threading import Thread
+from threading import Thread, Lock
 import requests
 from urllib.parse import urlparse, urljoin, ParseResult
 
@@ -10,7 +10,6 @@ class PageFetcher(Thread):
     def __init__(self, obj_scheduler):
         super().__init__()
         self.obj_scheduler = obj_scheduler
-        self.usr_agent = obj_scheduler.usr_agent
 
     def request_url(self, obj_url: ParseResult) -> Optional[bytes] or None:
         """
@@ -18,7 +17,7 @@ class PageFetcher(Thread):
         :return: Conteúdo em binário da URL passada como parâmetro, ou None se o conteúdo não for HTML
         """
 
-        response = requests.get(url=obj_url.geturl(), headers={'User-Agent': self.usr_agent})
+        response = requests.get(url=obj_url.geturl(), headers={'User-Agent': self.obj_scheduler.usr_agent})
         return response.content if 'text/html' in response.headers['Content-Type'] else None
 
     def discover_links(self, obj_url: ParseResult, depth: int, bin_str_content: bytes):
@@ -46,11 +45,12 @@ class PageFetcher(Thread):
         url, depth = self.obj_scheduler.get_next_url()
         if url is not None:
             if self.obj_scheduler.can_fetch_page(url):
-                bin_str_content = self.request_url(url)
-                if bin_str_content is not None:
-                    for obj_new_url, new_depth in self.discover_links(url, depth, bin_str_content):
-                        if obj_new_url is not None:
-                            self.obj_scheduler.add_new_page(obj_new_url, new_depth)
+                base_html = self.request_url(url)
+                if base_html is not None:
+                    print(f'URL: {url.geturl()}')
+                    self.obj_scheduler.count_fetched_page()
+                    for obj_new_url, new_depth in self.discover_links(url, depth, base_html):
+                        self.obj_scheduler.add_new_page(obj_new_url, new_depth)
 
     def run(self):
         """

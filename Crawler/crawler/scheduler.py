@@ -72,13 +72,13 @@ class Scheduler:
         # https://docs.python.org/3/library/urllib.parse.html
         if not self.can_add_page(obj_url, depth):
             return False
+
         domain = Domain(obj_url.hostname, self.TIME_LIMIT_BETWEEN_REQUESTS)
-        if not (domain in self.dic_url_per_domain):
+        if not (domain in self.dic_url_per_domain.keys()):
             self.dic_url_per_domain[domain] = [(obj_url, depth)]
         else:
             self.dic_url_per_domain[domain].append((obj_url, depth))
         self.set_discovered_urls.add(obj_url.geturl())
-        self.count_fetched_page()
         return True
 
     @synchronized
@@ -89,8 +89,8 @@ class Scheduler:
         """
         for domain in self.dic_url_per_domain.keys():
             if domain.is_accessible():
+                domain.accessed_now()
                 if len(self.dic_url_per_domain[domain]) > 0:
-                    domain.accessed_now()
                     url = self.dic_url_per_domain[domain].pop(0)
                     return url
         sleep(self.TIME_LIMIT_BETWEEN_REQUESTS)           
@@ -104,7 +104,8 @@ class Scheduler:
         domain = Domain(obj_url.hostname, self.TIME_LIMIT_BETWEEN_REQUESTS)
         url = obj_url.geturl()
         url_robots = obj_url.scheme + "://" + obj_url.hostname + "/robots.txt"
-        if domain in self.dic_robots_per_domain:
+        
+        if domain in self.dic_robots_per_domain.keys():
             rp_exist_domain = self.dic_robots_per_domain[domain]
             return self.__check_can_fetch_page(rp_exist_domain, url)      
         rp = robotparser.RobotFileParser()
