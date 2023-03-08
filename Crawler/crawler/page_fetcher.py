@@ -25,18 +25,16 @@ class PageFetcher(Thread):
         Retorna os links do conteúdo bin_str_content da página já requisitada obj_url
         """
         soup = BeautifulSoup(bin_str_content, features="lxml")
-        for link in soup.select('a'):
-            obj_new_url = None
-            new_depth = None
-            try:
-                obj_new_url = urlparse(urljoin(obj_url.geturl(), link['href']))
-            except KeyError:
-                pass
-            else: 
-                if obj_new_url is not None:
-                    new_depth = 0 if obj_new_url.hostname != obj_url.hostname else depth + 1
-            yield obj_new_url, new_depth
-
+        for link in soup.select("body a"):
+            if not link.has_attr("href"):
+                continue
+            obj_new_url = link["href"]
+            if("://" not in obj_new_url):
+                obj_new_url = f'{obj_url.scheme}://{obj_url.hostname}/{obj_new_url}'
+            new_depth = depth + 1
+            if obj_url.hostname not in obj_new_url:
+                new_depth = 0
+            yield urlparse(obj_new_url), new_depth
 
     def crawl_new_url(self):
         """
@@ -46,19 +44,19 @@ class PageFetcher(Thread):
         if url is not None:
             if self.obj_scheduler.can_fetch_page(url):
                 base_html = self.request_url(url)
-                if base_html is not None:
+                if base_html is not None:                    
                     print(f'URL: {url.geturl()}')
                     self.obj_scheduler.count_fetched_page()
                     for obj_new_url, new_depth in self.discover_links(url, depth, base_html):
-                        self.obj_scheduler.add_new_page(obj_new_url, new_depth)
+                        if url is not None:
+                            self.obj_scheduler.add_new_page(obj_new_url, new_depth)
 
     def run(self):
         """
         Executa coleta enquanto houver páginas a serem coletadas
         """
         while not self.obj_scheduler.has_finished_crawl():
-            self.crawl_new_url()
-        print('Finished crawling')
-        print(f'Page count: {self.obj_scheduler.page_count}')
-        print(f'URL count: {len(self.obj_scheduler.set_discovered_urls)}')
-        print(f'Domain count: {len(self.obj_scheduler.dic_url_per_domain)}')
+            try:
+                self.crawl_new_url()
+            except Exception as e:
+                print(f'Error: {e}')

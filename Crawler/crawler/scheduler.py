@@ -54,13 +54,10 @@ class Scheduler:
         """
         :return: True caso a profundidade for menor que a maxima e a url não foi descoberta ainda. False caso contrário.
         """
-        domain = Domain(obj_url.hostname, self.TIME_LIMIT_BETWEEN_REQUESTS)
-        value = self.dic_url_per_domain.get(domain)
-        if value is not None:
-            if (obj_url, depth) in value:
-                return False
-        return depth < self.depth_limit
-
+        return depth < self.depth_limit \
+            and obj_url.geturl() not in self.set_discovered_urls \
+            and not self.has_finished_crawl()
+            
     @synchronized
     def add_new_page(self, obj_url: ParseResult, depth: int) -> bool:
         """
@@ -93,6 +90,8 @@ class Scheduler:
                 if len(self.dic_url_per_domain[domain]) > 0:
                     url = self.dic_url_per_domain[domain].pop(0)
                     return url
+                else:
+                    del self.dic_url_per_domain[domain]
         sleep(self.TIME_LIMIT_BETWEEN_REQUESTS)           
         return None, None
 
