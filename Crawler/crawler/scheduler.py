@@ -78,6 +78,7 @@ class Scheduler:
         else:
             self.dic_url_per_domain[domain].append((obj_url, depth))
         self.set_discovered_urls.add(obj_url.geturl())
+        self.count_fetched_page()
         return True
 
     @synchronized
