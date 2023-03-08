@@ -33,6 +33,9 @@ class Scheduler:
         self.set_discovered_urls = set()
         self.dic_robots_per_domain = {}
 
+        for url_seed in arr_urls_seeds:
+            self.add_new_page(url_seed, 1)
+
     @synchronized
     def count_fetched_page(self) -> None:
         """
@@ -92,6 +95,7 @@ class Scheduler:
         sleep(self.TIME_LIMIT_BETWEEN_REQUESTS)           
         return None, None
 
+    @synchronized
     def can_fetch_page(self, obj_url: ParseResult) -> bool:
         """
         Verifica, por meio do robots.txt se uma determinada URL pode ser coletada
@@ -112,7 +116,7 @@ class Scheduler:
         """
         Verifica se uma determinada URL pode ser coletada
         """
-        robot_str = str(robot)
-        if not (robot_str and robot_str.strip()):
+        robot_as_str = str(robot)
+        if not (robot_as_str and robot_as_str.strip()):
             return True
         return robot.can_fetch(self.usr_agent, url)
