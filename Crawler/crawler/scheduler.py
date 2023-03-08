@@ -101,17 +101,18 @@ class Scheduler:
         url_robots = obj_url.scheme + "://" + obj_url.hostname + "/robots.txt"
         if domain in self.dic_robots_per_domain:
             rp_exist_domain = self.dic_robots_per_domain[domain]
-            can_fetch_exist_domain = rp_exist_domain.can_fetch(self.usr_agent, url)
-            if can_fetch_exist_domain:
-                return True
-            return False    
+            return self.__check_can_fetch_page(rp_exist_domain, url)      
         rp = robotparser.RobotFileParser()
         rp.set_url(url_robots)
         rp.read()
-        print("RP: ", rp, "\n")
         self.dic_robots_per_domain[domain] = rp
-        can_fetch = rp.can_fetch(self.usr_agent, url)
-        if can_fetch:
+        return self.__check_can_fetch_page(rp, url) 
+    
+    def __check_can_fetch_page(self, robot: robotparser.RobotFileParser, url: str) -> bool:
+        """
+        Verifica se uma determinada URL pode ser coletada
+        """
+        robot_str = str(robot)
+        if not (robot_str and robot_str.strip()):
             return True
-        return False
-        
+        return robot.can_fetch(self.usr_agent, url)
