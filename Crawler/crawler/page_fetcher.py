@@ -10,6 +10,7 @@ class PageFetcher(Thread):
     def __init__(self, obj_scheduler):
         super().__init__()
         self.obj_scheduler = obj_scheduler
+        self.usr_agent = obj_scheduler.usr_agent
 
     def request_url(self, obj_url: ParseResult) -> Optional[bytes] or None:
         """
@@ -17,9 +18,8 @@ class PageFetcher(Thread):
         :return: Conteúdo em binário da URL passada como parâmetro, ou None se o conteúdo não for HTML
         """
 
-        response = None
-
-        return response.content
+        response = requests.get(url=obj_url.geturl(), headers={'User-Agent': self.usr_agent})
+        return response.content if 'text/html' in response.headers['Content-Type'] else None
 
     def discover_links(self, obj_url: ParseResult, depth: int, bin_str_content: bytes):
         """
