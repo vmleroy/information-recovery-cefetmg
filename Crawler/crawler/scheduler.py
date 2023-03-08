@@ -96,5 +96,22 @@ class Scheduler:
         """
         Verifica, por meio do robots.txt se uma determinada URL pode ser coletada
         """
-
+        domain = Domain(obj_url.hostname, self.TIME_LIMIT_BETWEEN_REQUESTS)
+        url = obj_url.geturl()
+        url_robots = obj_url.scheme + "://" + obj_url.hostname + "/robots.txt"
+        if domain in self.dic_robots_per_domain:
+            rp_exist_domain = self.dic_robots_per_domain[domain]
+            can_fetch_exist_domain = rp_exist_domain.can_fetch(self.usr_agent, url)
+            if can_fetch_exist_domain:
+                return True
+            return False    
+        rp = robotparser.RobotFileParser()
+        rp.set_url(url_robots)
+        rp.read()
+        print("RP: ", rp, "\n")
+        self.dic_robots_per_domain[domain] = rp
+        can_fetch = rp.can_fetch(self.usr_agent, url)
+        if can_fetch:
+            return True
         return False
+        
