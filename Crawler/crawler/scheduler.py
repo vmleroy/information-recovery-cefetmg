@@ -54,9 +54,7 @@ class Scheduler:
         """
         :return: True caso a profundidade for menor que a maxima e a url não foi descoberta ainda. False caso contrário.
         """
-        return depth < self.depth_limit \
-            and obj_url.geturl() not in self.set_discovered_urls \
-            and not self.has_finished_crawl()
+        return (depth < self.depth_limit) and (obj_url.geturl() not in self.set_discovered_urls) and (not self.has_finished_crawl())
             
     @synchronized
     def add_new_page(self, obj_url: ParseResult, depth: int) -> bool:
@@ -71,9 +69,9 @@ class Scheduler:
             return False
 
         domain = Domain(obj_url.hostname, self.TIME_LIMIT_BETWEEN_REQUESTS)
-        if not (domain in self.dic_url_per_domain.keys()):
+        if not (domain in self.dic_url_per_domain): # Verifica se o domínio já está na fila, se nao estiver, adiciona
             self.dic_url_per_domain[domain] = [(obj_url, depth)]
-        else:
+        else: # Caso já esteja, adiciona a URL no final da fila
             self.dic_url_per_domain[domain].append((obj_url, depth))
         self.set_discovered_urls.add(obj_url.geturl())
         return True
@@ -84,14 +82,14 @@ class Scheduler:
         Obtém uma nova URL por meio da fila. Essa URL é removida da fila.
         Logo após, caso o servidor não tenha mais URLs, o mesmo também é removido.
         """
-        for domain in self.dic_url_per_domain.keys():
-            if domain.is_accessible():
-                domain.accessed_now()
-                if len(self.dic_url_per_domain[domain]) > 0:
-                    url = self.dic_url_per_domain[domain].pop(0)
+        for domain in self.dic_url_per_domain:
+            if domain.is_accessible(): # Verifica se o tempo limite entre as requisições foi respeitado
+                domain.accessed_now() # Atualiza o tempo de acesso
+                if len(self.dic_url_per_domain[domain]) > 0: # Verifica se o servidor ainda tem URLs
+                    url = self.dic_url_per_domain[domain].pop(0) # Obtém a URL
                     return url
                 else:
-                    del self.dic_url_per_domain[domain]
+                    del self.dic_url_per_domain[domain] # Remove o servidor da fila caso não tenha mais URLs
         sleep(self.TIME_LIMIT_BETWEEN_REQUESTS)           
         return None, None
 
@@ -104,12 +102,12 @@ class Scheduler:
         url = obj_url.geturl()
         url_robots = obj_url.scheme + "://" + obj_url.hostname + "/robots.txt"
         
-        if domain in self.dic_robots_per_domain.keys():
-            rp_exist_domain = self.dic_robots_per_domain[domain]
-            return self.__check_can_fetch_page(rp_exist_domain, url)      
+        if domain in self.dic_robots_per_domain: # Verifica se o robots.txt já foi lido
+            rp_exist_domain = self.dic_robots_per_domain[domain] 
+            return self.__check_can_fetch_page(rp_exist_domain, url)
         rp = robotparser.RobotFileParser()
         rp.set_url(url_robots)
-        rp.read()
+        rp.read() # Lê o robots.txt e salva no parser
         self.dic_robots_per_domain[domain] = rp
         return self.__check_can_fetch_page(rp, url) 
     
@@ -117,7 +115,7 @@ class Scheduler:
         """
         Verifica se uma determinada URL pode ser coletada
         """
-        robot_as_str = str(robot)
-        if not (robot_as_str and robot_as_str.strip()):
-            return True
-        return robot.can_fetch(self.usr_agent, url)
+        robot_as_str = str(robot) # Transforma o objeto em string para evitar problemas caso o robot.txt esteja vazio
+        if not (robot_as_str and robot_as_str.strip()): # Verifica se a string está vazia
+            return True # Caso esteja vazia, retorna True, pois esta tudo liberado
+        return robot.can_fetch(self.usr_agent, url) 

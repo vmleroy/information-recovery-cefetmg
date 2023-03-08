@@ -26,13 +26,13 @@ class PageFetcher(Thread):
         """
         soup = BeautifulSoup(bin_str_content, features="lxml")
         for link in soup.select("body a"):
-            if not link.has_attr('href'):
-                continue
+            if not link.has_attr('href'): # Se não tiver o atributo href, pula para o próximo link
+                continue # continue é como um break, mas não sai do loop
             href = link['href']
-            if "://" not in href:
+            if "://" not in href: # Se não for um link absoluto, transforma em absoluto (ex: /about -> http://www.google.com/about, # -> http://www.google.com/#, etc.) 
                 href = urljoin(obj_url.geturl(), href)
             new_depth = depth + 1
-            if obj_url.hostname not in href:
+            if obj_url.hostname not in href: # Se o link não for do mesmo domínio, adiciona o novo domínio na fila com profundidade 0
                 new_depth = 0
             yield urlparse(href), new_depth
 
@@ -42,14 +42,13 @@ class PageFetcher(Thread):
         """
         url, depth = self.obj_scheduler.get_next_url()
         if url is not None:
-            if self.obj_scheduler.can_fetch_page(url):
-                base_html = self.request_url(url)
+            if self.obj_scheduler.can_fetch_page(url): # Verifica se pode requisitar a página
+                base_html = self.request_url(url) # Requisita a página
                 if base_html is not None:                    
                     print(f'URL: {url.geturl()}')
-                    self.obj_scheduler.count_fetched_page()
-                    for obj_new_url, new_depth in self.discover_links(url, depth, base_html):
-                        if url is not None:
-                            self.obj_scheduler.add_new_page(obj_new_url, new_depth)
+                    self.obj_scheduler.count_fetched_page() # Conta a página requisitada
+                    for obj_new_url, new_depth in self.discover_links(url, depth, base_html): # Descobre os links da página requisitada
+                        self.obj_scheduler.add_new_page(obj_new_url, new_depth) # Adiciona os links na fila
 
     def run(self):
         """
