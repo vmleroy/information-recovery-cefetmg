@@ -48,7 +48,8 @@ class PageFetcher(Thread):
                     print(f'URL: {url.geturl()}')
                     self.obj_scheduler.count_fetched_page() # Conta a página requisitada
                     for obj_new_url, new_depth in self.discover_links(url, depth, base_html): # Descobre os links da página requisitada
-                        self.obj_scheduler.add_new_page(obj_new_url, new_depth) # Adiciona os links na fila
+                        if url is not None:
+                            self.obj_scheduler.add_new_page(obj_new_url, new_depth) # Adiciona os links na fila
 
     def run(self):
         """
