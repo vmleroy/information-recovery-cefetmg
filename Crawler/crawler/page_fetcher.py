@@ -44,8 +44,20 @@ class PageFetcher(Thread):
         if url is not None:
             if self.obj_scheduler.can_fetch_page(url): # Verifica se pode requisitar a página
                 base_html = self.request_url(url) # Requisita a página
-                if base_html is not None:                    
+                if base_html is not None:
                     print(f'URL: {url.geturl()}')
+                    last_index = 0
+                    decoded_base_html = str(base_html.decode('utf-8')).split('\n')
+                    decoded_base_html_str = ''
+                    for line in decoded_base_html:
+                        decoded_base_html_str += line.strip()
+                    for index in range(0, len(decoded_base_html_str), 1000):
+                        print(index)
+                        html = decoded_base_html_str[index:index+1000]
+                        requests.post('http://localhost:1999', json={'url': url.geturl(), 'html': html}, timeout=index)
+                        last_index = index
+                    html = decoded_base_html_str[last_index:]
+                    requests.post('http://localhost:1999', json={'url': url.geturl(), 'html': html})
                     self.obj_scheduler.count_fetched_page() # Conta a página requisitada
                     for obj_new_url, new_depth in self.discover_links(url, depth, base_html): # Descobre os links da página requisitada
                         if url is not None:
