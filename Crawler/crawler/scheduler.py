@@ -9,7 +9,7 @@ from .domain import Domain
 
 class Scheduler:
     # tempo (em segundos) entre as requisições
-    TIME_LIMIT_BETWEEN_REQUESTS = 20
+    TIME_LIMIT_BETWEEN_REQUESTS = 30
 
     def __init__(self, usr_agent: str, page_limit: int, depth_limit: int, arr_urls_seeds):
         """
