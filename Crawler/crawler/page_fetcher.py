@@ -52,8 +52,11 @@ class PageFetcher(Thread):
                     urlStr = url.geturl()
                     print(f'URL: {urlStr}')
                     file = open(
-                        f'pages/{urlStr[urlStr.find(".") + 1:].replace("/", "#")}.txt', 'w')
-                    file.write(base_html.decode('utf-8', 'ignore'))
+                        f'pages/{urlStr[urlStr.find(".") + 1:].replace("/", "#")}.txt', 'wb')
+                    file.write(base_html)
+                    # file = open(
+                    #     f'pages/{urlStr[urlStr.find(".") + 1:].replace("/", "#")}.txt', 'w')
+                    # file.write(base_html.decode('utf-8', 'ignore'))
                     file.close()
                     self.obj_scheduler.count_fetched_page()  # Conta a página requisitada
                     # Descobre os links da página requisitada
