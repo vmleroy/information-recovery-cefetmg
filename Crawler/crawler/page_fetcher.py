@@ -17,7 +17,8 @@ class PageFetcher(Thread):
         :return: Conteúdo em binário da URL passada como parâmetro, ou None se o conteúdo não for HTML
         """
 
-        response = requests.get(url=obj_url.geturl(), headers={'User-Agent': self.obj_scheduler.usr_agent})
+        response = requests.get(url=obj_url.geturl(), headers={
+                                'User-Agent': self.obj_scheduler.usr_agent})
         return response.content if 'text/html' in response.headers['Content-Type'] else None
 
     def discover_links(self, obj_url: ParseResult, depth: int, bin_str_content: bytes):
@@ -26,13 +27,15 @@ class PageFetcher(Thread):
         """
         soup = BeautifulSoup(bin_str_content, features="lxml")
         for link in soup.select("body a"):
-            if not link.has_attr('href'): # Se não tiver o atributo href, pula para o próximo link
-                continue # continue é como um break, mas não sai do loop
+            # Se não tiver o atributo href, pula para o próximo link
+            if not link.has_attr('href'):
+                continue  # continue é como um break, mas não sai do loop
             href = link['href']
-            if "://" not in href: # Se não for um link absoluto, transforma em absoluto (ex: /about -> http://www.google.com/about, # -> http://www.google.com/#, etc.) 
+            # Se não for um link absoluto, transforma em absoluto (ex: /about -> http://www.google.com/about, # -> http://www.google.com/#, etc.)
+            if "://" not in href:
                 href = urljoin(obj_url.geturl(), href)
             new_depth = depth + 1
-            if obj_url.hostname not in href: # Se o link não for do mesmo domínio, adiciona o novo domínio na fila com profundidade 0
+            if obj_url.hostname not in href:  # Se o link não for do mesmo domínio, adiciona o novo domínio na fila com profundidade 0
                 new_depth = 0
             yield urlparse(href), new_depth
 
@@ -42,26 +45,22 @@ class PageFetcher(Thread):
         """
         url, depth = self.obj_scheduler.get_next_url()
         if url is not None:
-            if self.obj_scheduler.can_fetch_page(url): # Verifica se pode requisitar a página
-                base_html = self.request_url(url) # Requisita a página
+            # Verifica se pode requisitar a página
+            if self.obj_scheduler.can_fetch_page(url):
+                base_html = self.request_url(url)  # Requisita a página
                 if base_html is not None:
-                    print(f'URL: {url.geturl()}')
-                    last_index = 0
-                    decoded_base_html = str(base_html.decode('utf-8')).split('\n')
-                    decoded_base_html_str = ''
-                    for line in decoded_base_html:
-                        decoded_base_html_str += line.strip()
-                    for index in range(0, len(decoded_base_html_str), 1000):
-                        print(index)
-                        html = decoded_base_html_str[index:index+1000]
-                        requests.post('http://localhost:1999', json={'url': url.geturl(), 'html': html}, timeout=index)
-                        last_index = index
-                    html = decoded_base_html_str[last_index:]
-                    requests.post('http://localhost:1999', json={'url': url.geturl(), 'html': html})
-                    self.obj_scheduler.count_fetched_page() # Conta a página requisitada
-                    for obj_new_url, new_depth in self.discover_links(url, depth, base_html): # Descobre os links da página requisitada
+                    urlStr = url.geturl()
+                    print(f'URL: {urlStr}')
+                    file = open(
+                        f'pages/{urlStr[urlStr.find(".") + 1:].replace("/", "#")}.txt', 'w')
+                    file.write(base_html.decode('utf-8', 'ignore'))
+                    file.close()
+                    self.obj_scheduler.count_fetched_page()  # Conta a página requisitada
+                    # Descobre os links da página requisitada
+                    for obj_new_url, new_depth in self.discover_links(url, depth, base_html):
                         if url is not None:
-                            self.obj_scheduler.add_new_page(obj_new_url, new_depth) # Adiciona os links na fila
+                            self.obj_scheduler.add_new_page(
+                                obj_new_url, new_depth)  # Adiciona os links na fila
 
     def run(self):
         """
