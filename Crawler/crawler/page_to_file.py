@@ -1,7 +1,5 @@
 from urllib.parse import ParseResult
-from util.threads import synchronized
 
-@synchronized
 def page_to_file(url: ParseResult, base_html: bytes):
     """
     Salva o conteúdo da página em um arquivo

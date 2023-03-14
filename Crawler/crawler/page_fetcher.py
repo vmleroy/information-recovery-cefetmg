@@ -17,18 +17,21 @@ class PageFetcher(Thread):
         :param obj_url: Instância da classe ParseResult com a URL a ser requisitada.
         :return: Conteúdo em binário da URL passada como parâmetro, ou None se o conteúdo não for HTML
         """
-        response = requests.get(url=obj_url.geturl(), headers={'User-Agent': self.obj_scheduler.usr_agent})
-        return response.content if 'text/html' in response.headers['Content-Type'] else None
+        response = requests.get(url=obj_url.geturl(), 
+                                headers={'user-agent': self.obj_scheduler.usr_agent})
+        return response.content if 'text/html' in response.headers['content-type'] else None
 
     def discover_links(self, obj_url: ParseResult, depth: int, bin_str_content: bytes):
         """
         Retorna os links do conteúdo bin_str_content da página já requisitada obj_url
         """
         soup = BeautifulSoup(bin_str_content, features="lxml")
+
         for link in soup.select("meta"):  # Verifica as meta tags
             if link.has_attr('name') and link['name'] == 'robots':
-                if 'noindex' in link['content'] or 'nofollow' in link['content']:  # Se a página não deve ser indexada e não deve ser seguida, retorna
+                if 'noindex' in link['content'] or 'nofollow' in link['content']:  # Se a página não deve ser indexada (coletada) ou não deve ser seguida, retorna None
                     return None, None
+                
         for link in soup.select("body a"):
             if not link.has_attr('href'): # Se não tiver o atributo href, pula para o próximo link
                 continue  # continue é como um break, mas não sai do loop
@@ -45,17 +48,19 @@ class PageFetcher(Thread):
         Coleta uma nova URL, obtendo-a do escalonador
         """
         url, depth = self.obj_scheduler.get_next_url()
+
         if url is not None:
             if self.obj_scheduler.can_fetch_page(url): # Verifica se pode requisitar a página
                 base_html = self.request_url(url)  # Requisita a página
+
                 if base_html is not None:
-                    print(f'URL [{self.obj_scheduler.page_limit}]: {url.geturl()}')
+                    print(f'URL [{self.obj_scheduler.page_count}]: {url.geturl()}')
+                    self.obj_scheduler.count_fetched_page()  # Conta a página requisitada
                     if (save_file):
                         page_to_file(url, base_html)  # Salva a página em um arquivo
-                    self.obj_scheduler.count_fetched_page()  # Conta a página requisitada
+
                     for obj_new_url, new_depth in self.discover_links(url, depth, base_html): # Descobre os links da página requisitada
-                        if url is not None:
-                            self.obj_scheduler.add_new_page(obj_new_url, new_depth)  # Adiciona os links na fila
+                        self.obj_scheduler.add_new_page(obj_new_url, new_depth)  # Adiciona os links na fila
 
     def run(self, save_file: bool = False):
         """

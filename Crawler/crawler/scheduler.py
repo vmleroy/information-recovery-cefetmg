@@ -54,7 +54,7 @@ class Scheduler:
         """
         :return: True caso a profundidade for menor que a maxima e a url não foi descoberta ainda. False caso contrário.
         """
-        return (depth < self.depth_limit) and (obj_url.geturl() not in self.set_discovered_urls) and (not self.has_finished_crawl())
+        return (depth < self.depth_limit) and (obj_url.geturl() not in self.set_discovered_urls)
             
     @synchronized
     def add_new_page(self, obj_url: ParseResult, depth: int) -> bool:
@@ -93,7 +93,6 @@ class Scheduler:
         sleep(self.TIME_LIMIT_BETWEEN_REQUESTS)           
         return None, None
 
-    @synchronized
     def can_fetch_page(self, obj_url: ParseResult) -> bool:
         """
         Verifica, por meio do robots.txt se uma determinada URL pode ser coletada
