@@ -13,4 +13,3 @@ def page_to_file(url: ParseResult, base_html: bytes):
     file = open(file_path, 'ab')
     file.write(base_html)
     file.close()
-    print(f'Arquivo salvo em: {file_path}')
