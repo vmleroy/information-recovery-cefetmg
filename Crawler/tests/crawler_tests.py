@@ -2,9 +2,12 @@ import time
 from urllib.parse import urlparse
 from crawler import page_fetcher, scheduler
 
+USR_AGENT = 'Linkin-Crawken-Bot (https://vmleroy.github.io/ri-crawler-page/)'
+
+########################
+
 def activity12_test():
   start = time.time()
-  usr_agent = 'crawler-bot'
   depth_limit = 6
   page_limit = 30
   webpage_seeds = [
@@ -23,7 +26,7 @@ def activity12_test():
                   ]
   parsed_webpage_seeds = [urlparse(url) for url in webpage_seeds]
 
-  obj_scheduler = scheduler.Scheduler(usr_agent, page_limit, depth_limit, parsed_webpage_seeds)
+  obj_scheduler = scheduler.Scheduler(USR_AGENT, page_limit, depth_limit, parsed_webpage_seeds)
 
   fetchers_qtd = 5
   obj_process = []
@@ -40,10 +43,10 @@ def activity12_test():
   end = time.time()
   print('Tempo total: ', end - start)
 
+########################
 
 def crawler_50k_pages():
   start = time.time()
-  usr_agent = 'crawler-bot'
   depth_limit = 6
   page_limit = 50000
   webpage_seeds = [
@@ -62,7 +65,7 @@ def crawler_50k_pages():
                   ]
   parsed_webpage_seeds = [urlparse(url) for url in webpage_seeds]
 
-  obj_scheduler = scheduler.Scheduler(usr_agent, page_limit, depth_limit, parsed_webpage_seeds)
+  obj_scheduler = scheduler.Scheduler(USR_AGENT, page_limit, depth_limit, parsed_webpage_seeds)
 
   fetchers_qtd = 16
   obj_process = []
@@ -79,10 +82,10 @@ def crawler_50k_pages():
   end = time.time()
   print('Tempo total: ', end - start)
   
+########################
 
 def crawler_1M_pages_saving_files():
   start = time.time()
-  usr_agent = 'crawler-bot'
   depth_limit = 6
   page_limit = 1000000
   webpage_seeds = [
@@ -101,7 +104,7 @@ def crawler_1M_pages_saving_files():
                   ]
   parsed_webpage_seeds = [urlparse(url) for url in webpage_seeds]
 
-  obj_scheduler = scheduler.Scheduler(usr_agent, page_limit, depth_limit, parsed_webpage_seeds)
+  obj_scheduler = scheduler.Scheduler(USR_AGENT, page_limit, depth_limit, parsed_webpage_seeds)
 
   fetchers_qtd = 1000
   obj_process = []
@@ -118,10 +121,10 @@ def crawler_1M_pages_saving_files():
   end = time.time()
   print('Tempo total: ', end - start)  
 
+########################
 
 def crawler_50k_pages_saving_files():
   start = time.time()
-  usr_agent = 'crawler-bot'
   depth_limit = 6
   page_limit = 50000
   webpage_seeds = [
@@ -131,7 +134,7 @@ def crawler_50k_pages_saving_files():
                   ]
   parsed_webpage_seeds = [urlparse(url) for url in webpage_seeds]
 
-  obj_scheduler = scheduler.Scheduler(usr_agent, page_limit, depth_limit, parsed_webpage_seeds)
+  obj_scheduler = scheduler.Scheduler(USR_AGENT, page_limit, depth_limit, parsed_webpage_seeds)
 
   fetchers_qtd = 16
   obj_process = []

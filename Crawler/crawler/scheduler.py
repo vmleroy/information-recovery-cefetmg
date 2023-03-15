@@ -102,7 +102,7 @@ class Scheduler:
         url = obj_url.geturl()
         url_robots = obj_url.scheme + "://" + obj_url.hostname + "/robots.txt"
         
-        if self.has_finished_crawl():
+        if self.has_finished_crawl(): # Verifica se a coleta já foi finalizada
             return False
         
         if domain in self.dic_robots_per_domain: # Verifica se o robots.txt já foi lido
