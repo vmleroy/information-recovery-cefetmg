@@ -125,8 +125,9 @@ def crawler_50k_pages_saving_files():
   depth_limit = 6
   page_limit = 50000
   webpage_seeds = [
-                    'http://www.youtube.com/',
-                    'http://crunchyroll.com/'
+                    'https://www.youtube.com/',
+                    'https://crunchyroll.com/',
+                    'https://www.reddit.com'
                   ]
   parsed_webpage_seeds = [urlparse(url) for url in webpage_seeds]
 

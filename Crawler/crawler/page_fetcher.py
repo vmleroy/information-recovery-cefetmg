@@ -59,7 +59,7 @@ class PageFetcher(Thread):
                     self.obj_scheduler.count_fetched_page()  # Conta a página requisitada
                     if (self.save_file):
                         page_to_file(url, base_html)  # Salva a página em um arquivo
-
+                        
                     for obj_new_url, new_depth in self.discover_links(url, depth, base_html): # Descobre os links da página requisitada
                         self.obj_scheduler.add_new_page(obj_new_url, new_depth)  # Adiciona os links na fila
 
