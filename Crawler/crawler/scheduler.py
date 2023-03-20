@@ -43,6 +43,7 @@ class Scheduler:
         """
         self.page_count += 1
 
+    @synchronized
     def has_finished_crawl(self) -> bool:
         """
         :return: True se finalizou a coleta. False caso contrário.
@@ -100,6 +101,9 @@ class Scheduler:
         domain = Domain(obj_url.hostname, self.TIME_LIMIT_BETWEEN_REQUESTS)
         url = obj_url.geturl()
         url_robots = obj_url.scheme + "://" + obj_url.hostname + "/robots.txt"
+        
+        if self.has_finished_crawl(): # Verifica se a coleta já foi finalizada
+            return False
         
         if domain in self.dic_robots_per_domain: # Verifica se o robots.txt já foi lido
             rp_exist_domain = self.dic_robots_per_domain[domain] 

@@ -5,12 +5,14 @@ from threading import Thread, Lock
 import requests
 from urllib.parse import urlparse, urljoin, ParseResult
 
-from .page_to_file import page_to_file
+from crawler.page_to_file import page_to_file
+from crawler.scheduler import Scheduler
 
 class PageFetcher(Thread):
-    def __init__(self, obj_scheduler):
+    def __init__(self, obj_scheduler, save_file: bool = False):
         super().__init__()
-        self.obj_scheduler = obj_scheduler
+        self.obj_scheduler: Scheduler = obj_scheduler
+        self.save_file = save_file
 
     def request_url(self, obj_url: ParseResult) -> Optional[bytes] or None:
         """
@@ -43,31 +45,30 @@ class PageFetcher(Thread):
                 new_depth = 0
             yield urlparse(href), new_depth
 
-    def crawl_new_url(self, save_file: bool = False):
+    def crawl_new_url(self):
         """
         Coleta uma nova URL, obtendo-a do escalonador
         """
         url, depth = self.obj_scheduler.get_next_url()
 
-        if url is not None:
+        if url:
             if self.obj_scheduler.can_fetch_page(url): # Verifica se pode requisitar a página
                 base_html = self.request_url(url)  # Requisita a página
-
                 if base_html is not None:
                     print(f'URL [{self.obj_scheduler.page_count}]: {url.geturl()}')
                     self.obj_scheduler.count_fetched_page()  # Conta a página requisitada
-                    if (save_file):
-                        page_to_file(url, base_html)  # Salva a página em um arquivo
-
+                    if (self.save_file):
+                        page_to_file(url, base_html)  # Salva a página em um arquivo 
                     for obj_new_url, new_depth in self.discover_links(url, depth, base_html): # Descobre os links da página requisitada
                         self.obj_scheduler.add_new_page(obj_new_url, new_depth)  # Adiciona os links na fila
 
-    def run(self, save_file: bool = False):
+    def run(self):
         """
         Executa coleta enquanto houver páginas a serem coletadas
         """
         while not self.obj_scheduler.has_finished_crawl():
             try:
-                self.crawl_new_url(save_file)
+                self.crawl_new_url()
             except Exception as e:
-                print(f'Error: {e}')
+                # print(f'Error: {e}')
+                pass
