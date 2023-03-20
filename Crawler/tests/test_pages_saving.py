@@ -26,7 +26,7 @@ def test_1M_pages_saving_files():
 
   obj_scheduler = scheduler.Scheduler(USR_AGENT, page_limit, depth_limit, parsed_webpage_seeds)
 
-  fetchers_qtd = 1000
+  fetchers_qtd = 16
   obj_process = []
   
   start = time.time()

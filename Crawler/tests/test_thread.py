@@ -34,12 +34,10 @@ def test(num_threads):
   start = time.time()
   for i in range(num_threads):
     obj_process.append(PageFetcher(scheduler))
-    print(f'Thread {i} started, {obj_process[i].name}')
     obj_process[i].start()
 
   for fetcher in obj_process:
     fetcher.join()
-    print(f'Joining {fetcher.name}')
   end = time.time()
 
   interval = end - start
