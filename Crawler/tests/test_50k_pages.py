@@ -76,7 +76,7 @@ def test_50k_pages_with_thread_print():
     
   for p in obj_process:
     p.join()
-    print(f'Joining {p.name}')
+    print(f'Ending {p.name}')
   end = time.time()
 
   print('Fim da coleta')
