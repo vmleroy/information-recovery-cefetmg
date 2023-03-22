@@ -75,8 +75,15 @@ def test_50k_pages_with_thread_print():
     print(f'Starting {obj_process[i].name}')
     
   for p in obj_process:
-    p.join()
-    print(f'Ending {p.name}')
+    try:
+      p.join()
+      if not p.is_alive():
+        print(f'Ending {p.name}')
+      else:
+        print(f'Error in {p.name}')
+    except Exception as e:
+      print(f'Exception in {p.name}:\n {e}')
+      
   end = time.time()
 
   print('Fim da coleta')
