@@ -6,7 +6,7 @@ def page_to_file(url: ParseResult, base_html: bytes):
     """
     urlStr = url.geturl()
     urlStr = urlStr[urlStr.find("://") + 3:].replace("/", "#").replace(":", "#").replace("?", "#").replace("&", "#")
-    file_path = f'pages/{urlStr}.txt'
+    file_path = f'data/pages/{urlStr}.html'
 
     file = open(file_path, 'w')
     file.write(f'URL: {url.geturl()}\n\n')
