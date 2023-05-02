@@ -1,7 +1,11 @@
 *.h5
-*.pyc
 embeddings.txt
 *.npz
 *.idx
-.ipynb_checkpoints
 .idea
+
+data/pages/*
+__pycache__/
+*.py[cod]
+*.pyc
+.ipynb_checkpoints
