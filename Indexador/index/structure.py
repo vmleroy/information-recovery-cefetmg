@@ -61,11 +61,16 @@ class Index:
         print("~ Indexação finalizada! ~")
 
     def write(self, arq_index: str):
-        pass
+        file = open(arq_index, "wb")
+        pickle.dump(self, file)
+        file.close()
 
     @staticmethod
     def read(arq_index: str):
-        pass
+        file = open(arq_index, "rb")
+        obj = pickle.load(file)
+        file.close()
+        return obj
 
     def __str__(self):
         arr_index = []
@@ -275,7 +280,7 @@ class FileIndex(Index):
             next_file = self.next_from_file(old_file)
 
         # limpa a lista de ocorrências temporárias e reseta os índices
-        self.lst_occurrences_tmp = []
+        self.lst_occurrences_tmp = [None]*FileIndex.TMP_OCCURRENCES_LIMIT
         self.idx_tmp_occur_first_element = 0
         self.idx_tmp_occur_last_element = -1
 
@@ -334,24 +339,19 @@ class FileIndex(Index):
             # entao o termo existe e ele tem um id
             term_id = self.dic_index[term].term_id
 
-            # pode occorrer mais de uma vez, por isso eh uma lista
-
-            # abrir o arquivo e ir para a posicao de inicio do termo
+            # Abrir o arquivo e ir para a posicao de inicio do termo
             idx_file = open(self.str_idx_file_name, 'rb')
             idx_file.seek(self.dic_index[term].term_file_start_pos)
 
-            # consumir a primeira ocorrencia
+            # Consumir a primeira ocorrencia
             next = self.next_from_file(idx_file)
-            # enquanto o next tiver o mesmo term_id do passado na busca vai add
+
+            # Enquanto o next tiver o mesmo term_id do passado na busca vai add
             while (next != None and next.term_id == term_id):
                 occurrence_list.append(next)
-                # ja ta em ordem, so chamar a proxima ocorrencia
                 next = self.next_from_file(idx_file)
 
-            # ja add todos
             idx_file.close()
-        else:
-            pass  # se nao ta no dicionario, o termo nao ocorre no arquivo
         return occurrence_list
 
     def document_count_with_term(self, term: str) -> int:
