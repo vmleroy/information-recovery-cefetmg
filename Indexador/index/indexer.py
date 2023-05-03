@@ -72,7 +72,7 @@ class HTMLIndexer:
     def text_word_count(self, plain_text: str):
         dic_word_count = {}
 
-        plain_text = self.cleaner.html_to_plain_text(plain_text)
+        plain_text = self.cleaner.preprocess_text(plain_text)
         tokens = word_tokenize(plain_text, language="portuguese")
 
         for word in tokens:
@@ -86,7 +86,11 @@ class HTMLIndexer:
         return dic_word_count
 
     def index_text(self, doc_id: int, text_html: str):
-        pass
+        plain_text = self.cleaner.html_to_plain_text(text_html)
+        dic_word_count = self.text_word_count(plain_text)
+        for word, count in dic_word_count.items():
+            self.index.index(word, doc_id, count)
+        self.index.finish_indexing()
 
     def index_text_dir(self, path: str):
         for str_sub_dir in os.listdir(path):
