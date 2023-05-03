@@ -32,7 +32,7 @@ class Cleaner:
         with open(str_file, encoding='utf-8') as stop_words_file:
             for line in stop_words_file:
                 arr_words = line.split(",")
-                [set_stop_words.add(word) for word in arr_words]
+                [set_stop_words.add(word.strip()) for word in arr_words]
         return set_stop_words
 
     def is_stop_word(self, term: str):
@@ -72,7 +72,6 @@ class HTMLIndexer:
     def text_word_count(self, plain_text: str):
         dic_word_count = {}
 
-        plain_text = self.cleaner.preprocess_text(plain_text)
         tokens = word_tokenize(plain_text, language="portuguese")
 
         for word in tokens:
@@ -83,10 +82,13 @@ class HTMLIndexer:
                 else:
                     dic_word_count[word] = 1
 
+        # return dict(sorted(dic_word_count.items()))
         return dic_word_count
 
     def index_text(self, doc_id: int, text_html: str):
         plain_text = self.cleaner.html_to_plain_text(text_html)
+        plain_text = self.cleaner.preprocess_text(plain_text)
+
         dic_word_count = self.text_word_count(plain_text)
         for word, count in dic_word_count.items():
             self.index.index(word, doc_id, count)
@@ -95,3 +97,9 @@ class HTMLIndexer:
     def index_text_dir(self, path: str):
         for str_sub_dir in os.listdir(path):
             path_sub_dir = f"{path}/{str_sub_dir}"
+            for str_file in os.listdir(path_sub_dir):
+                path_file = f"{path_sub_dir}/{str_file}"
+                with open(path_file, encoding='utf-8') as file:
+                    self.index_text(int(str_file.split('.')[0]), file.read())
+                file.close()
+
