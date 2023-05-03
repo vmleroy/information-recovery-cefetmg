@@ -1,5 +1,5 @@
 from nltk.stem.snowball import SnowballStemmer
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup as bs
 import string
 from nltk.tokenize import word_tokenize
 import os
@@ -15,7 +15,7 @@ class Cleaner:
         in_table = "áéíóúâêôçãẽõü"
         out_table = "aeiouaeocaeou"
         # altere a linha abaixo para remoção de acentos (Atividade 11)
-        self.accents_translation_table = None
+        self.accents_translation_table = str.maketrans(in_table, out_table)
         self.set_punctuation = set(string.punctuation)
 
         # flags
@@ -24,7 +24,7 @@ class Cleaner:
         self.perform_stemming = perform_stemming
 
     def html_to_plain_text(self, html_doc: str) -> str:
-        return None
+        return bs(html_doc, 'html.parser').get_text()
 
     @staticmethod
     def read_stop_words(str_file) -> set:
@@ -36,19 +36,29 @@ class Cleaner:
         return set_stop_words
 
     def is_stop_word(self, term: str):
-        return True
+        return term in self.set_stop_words
 
     def word_stem(self, term: str):
-        return ""
+        return self.stemmer.stem(term)
 
     def remove_accents(self, term: str) -> str:
-        return None
+        return term.translate(self.accents_translation_table)
 
     def preprocess_word(self, term: str) -> str or None:
-        return None
+        if self.perform_stop_words_removal and self.is_stop_word(term):
+            return None
+        if term in self.set_punctuation:
+            return None
+        if self.perform_stemming:
+            term = self.word_stem(term)
+        return term
 
     def preprocess_text(self, text: str) -> str or None:
-        return None
+        text = text.lower()
+        if self.perform_accents_removal:
+            text = self.remove_accents(text)
+        return text
+    
 class HTMLIndexer:
     cleaner = Cleaner(stop_words_file="stopwords.txt",
                       language="portuguese",
@@ -61,6 +71,17 @@ class HTMLIndexer:
 
     def text_word_count(self, plain_text: str):
         dic_word_count = {}
+
+        plain_text = self.cleaner.html_to_plain_text(plain_text)
+        tokens = word_tokenize(plain_text, language="portuguese")
+
+        for word in tokens:
+            word = self.cleaner.preprocess_word(word)
+            if word is not None:
+                if word in dic_word_count:
+                    dic_word_count[word] += 1
+                else:
+                    dic_word_count[word] = 1
 
         return dic_word_count
 
