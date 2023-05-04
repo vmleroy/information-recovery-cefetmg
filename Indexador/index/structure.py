@@ -162,12 +162,13 @@ class TermFilePosition:
 class FileIndex(Index):
     TMP_OCCURRENCES_LIMIT = 1000000
 
-    def __init__(self):
+    def __init__(self, idx_dir: str = ""):
         super().__init__()
 
         self.lst_occurrences_tmp = [None]*FileIndex.TMP_OCCURRENCES_LIMIT
         self.idx_file_counter = 0
         self.str_idx_file_name = "occur_idx_file"
+        self.str_idx_dir = idx_dir
 
         # metodos auxiliares para verifica o tamanho da lst_occurrences_tmp
         self.idx_tmp_occur_last_element = -1
@@ -250,6 +251,10 @@ class FileIndex(Index):
             self.str_idx_file_name, 'rb')
         self.idx_file_counter += 1
         self.str_idx_file_name = f"occur_idx_file_{self.idx_file_counter}.idx"
+        if self.str_idx_dir:
+            if not os.path.exists(self.str_idx_dir):
+                os.makedirs(self.str_idx_dir)
+            self.str_idx_file_name = self.str_idx_dir + self.str_idx_file_name
         new_file = open(self.str_idx_file_name, 'wb')
 
         """

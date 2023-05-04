@@ -3,6 +3,7 @@ from bs4 import BeautifulSoup as bs
 import string
 from nltk.tokenize import word_tokenize
 import os
+from tqdm import tqdm
 
 
 class Cleaner:
@@ -32,7 +33,7 @@ class Cleaner:
         with open(str_file, encoding='utf-8') as stop_words_file:
             for line in stop_words_file:
                 arr_words = line.split(",")
-                [set_stop_words.add(word.strip()) for word in arr_words]
+                [set_stop_words.add(word.strip().replace("\n", "")) for word in arr_words]
         return set_stop_words
 
     def is_stop_word(self, term: str):
@@ -58,7 +59,8 @@ class Cleaner:
         if self.perform_accents_removal:
             text = self.remove_accents(text)
         return text
-    
+
+
 class HTMLIndexer:
     cleaner = Cleaner(stop_words_file="stopwords.txt",
                       language="portuguese",
@@ -94,12 +96,16 @@ class HTMLIndexer:
             self.index.index(word, doc_id, count)
         self.index.finish_indexing()
 
-    def index_text_dir(self, path: str):
-        for str_sub_dir in os.listdir(path):
-            path_sub_dir = f"{path}/{str_sub_dir}"
-            for str_file in os.listdir(path_sub_dir):
+    def index_text_dir(self, path: str, sub_dir: bool = True):
+        for str_sub_dir in tqdm(os.listdir(path),desc='Main loop', leave=True):
+        # for str_sub_dir in os.listdir(path):
+            if sub_dir:
+                path_sub_dir = f"{path}/{str_sub_dir}"
+            else:
+                path_sub_dir = path
+            for str_file in tqdm(os.listdir(path_sub_dir), leave=False):
+            # for str_file in os.listdir(path_sub_dir):
                 path_file = f"{path_sub_dir}/{str_file}"
                 with open(path_file, encoding='utf-8') as file:
                     self.index_text(int(str_file.split('.')[0]), file.read())
                 file.close()
-
