@@ -285,7 +285,6 @@ class FileIndex(Index):
             next_file = self.next_from_file(old_file)
 
         # limpa a lista de ocorrências temporárias e reseta os índices
-        self.lst_occurrences_tmp = [None]*FileIndex.TMP_OCCURRENCES_LIMIT
         self.idx_tmp_occur_first_element = 0
         self.idx_tmp_occur_last_element = -1
 
