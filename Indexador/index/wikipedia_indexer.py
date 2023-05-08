@@ -6,7 +6,8 @@ except:
     from structure import *
 
 if __name__ == "__main__":
-    obj_index = FileIndex(idx_dir="./data/occurrences/")
+    # obj_index = FileIndex(idx_dir="./data/occurrences/")
+    obj_index = HashIndex()
     html_indexer = HTMLIndexer(obj_index)
     html_indexer.cleaner = Cleaner(stop_words_file="stopwords2.txt",
                         language="portuguese",

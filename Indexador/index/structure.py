@@ -3,6 +3,7 @@ from typing import List, Set, Union
 from abc import abstractmethod
 from functools import total_ordering
 from os import path
+from util import custom_pickle
 import os
 import pickle
 import gc
@@ -58,7 +59,8 @@ class Index:
             "Voce deve criar uma subclasse e a mesma deve sobrepor este método")
 
     def finish_indexing(self):
-        print("~ Indexação finalizada! ~")
+        # print("~ Indexação finalizada! ~")
+        pass
 
     def write(self, arq_index: str):
         file = open(arq_index, "wb")
@@ -68,7 +70,7 @@ class Index:
     @staticmethod
     def read(arq_index: str):
         file = open(arq_index, "rb")
-        obj = pickle.load(file)
+        obj = custom_pickle.renamed_load(file)
         file.close()
         return obj
 
@@ -189,10 +191,10 @@ class FileIndex(Index):
         # não esqueça de atualizar a(s) variável(is) auxiliares apropriadamente
         new_occurrence = TermOccurrence(doc_id, term_id, term_freq)
 
-        self.idx_tmp_occur_last_element += 1
-        self.lst_occurrences_tmp[self.idx_tmp_occur_last_element] = new_occurrence
         if self.get_tmp_occur_size() >= FileIndex.TMP_OCCURRENCES_LIMIT:
             self.save_tmp_occurrences()
+        self.idx_tmp_occur_last_element += 1
+        self.lst_occurrences_tmp[self.idx_tmp_occur_last_element] = new_occurrence
 
     def next_from_list(self) -> TermOccurrence:
         if self.get_tmp_occur_size() > 0:
@@ -242,9 +244,7 @@ class FileIndex(Index):
         gc.disable()
 
         # Ordena pelo term_id, doc_id
-        occurrences = sorted(self.lst_occurrences_tmp[:self.get_tmp_occur_size(
-        )], key=lambda x: (x.term_id, x.doc_id))
-        self.lst_occurrences_tmp = occurrences
+        self.lst_occurrences_tmp.sort(key=lambda e: (e is None, e))
 
         # Cria o arquivo de índice e abre o arquivo antigo
         old_file = None if self.idx_file_counter == 0 else open(
