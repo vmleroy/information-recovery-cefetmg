@@ -1,3 +1,4 @@
+import io
 import pickle
 
 class RenameUnpickler(pickle.Unpickler):

@@ -3,11 +3,15 @@ from typing import List, Set, Union
 from abc import abstractmethod
 from functools import total_ordering
 from os import path
-from util import custom_pickle
+try:
+    from util import custom_pickle
+except ModuleNotFoundError:
+    import sys
+    sys.path.append(path.dirname(path.dirname(path.abspath(__file__))))
+    from util import custom_pickle
 import os
 import pickle
 import gc
-
 
 class Index:
     def __init__(self):
