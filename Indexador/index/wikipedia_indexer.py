@@ -1,9 +1,14 @@
+import unittest
+
 try:
     from index.indexer import *
     from index.structure import *
+    from index.performance_test import PerformanceTest
 except:
     from indexer import *
     from structure import *
+    from performance_test import PerformanceTest
+
 
 def make_wkipedia_index():
     # obj_index = FileIndex(idx_dir="./data/occurrences/")
