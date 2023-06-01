@@ -113,15 +113,15 @@ class VectorRankingModel(RankingModel):
             documents_weight = {}
             documents_norm = self.idx_pre_comp_vals.document_norm
 
-            for term, query_occur in query.items():
+            for term, query_occurrence in query.items():
                 if term not in docs_occur_per_term.keys():
                     continue
 
-                docs_occur = docs_occur_per_term[term]
-                num_docs_with_term = len(docs_occur)
-                Wiq = VectorRankingModel.tf_idf(self.idx_pre_comp_vals.doc_count, query_occur.term_freq, num_docs_with_term)
+                docs_occurrence = docs_occur_per_term[term]
+                num_docs_with_term = len(docs_occurrence)
+                Wiq = VectorRankingModel.tf_idf(self.idx_pre_comp_vals.doc_count, query_occurrence.term_freq, num_docs_with_term)
 
-                for occur in docs_occur:
+                for occur in docs_occurrence:
                     doc_id = occur.doc_id
                     if doc_id not in documents_weight.keys():
                         documents_weight[doc_id] = 0
