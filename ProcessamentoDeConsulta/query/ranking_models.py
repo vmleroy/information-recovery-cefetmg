@@ -18,7 +18,21 @@ class IndexPreComputedVals():
         """
         self.document_norm = {}
         self.doc_count = self.index.document_count
+
+        dictionary = self.index.dic_index
+        doc_count = len(self.index.set_documents)
+
+        for term, lst_occurrences in dictionary.items():
+            occurrence_list = self.index.get_occurrence_list(term)
+            num_docs_with_term = len(occurrence_list)
+            for occurrence in occurrence_list:
+                doc_id = occurrence.doc_id
+                if doc_id not in self.document_norm.keys():
+                    self.document_norm[doc_id] = 0
+                self.document_norm[doc_id] += math.pow(VectorRankingModel.tf_idf(doc_count, occurrence.term_freq, num_docs_with_term), 2)
         
+        for doc_id, norm in self.document_norm.items():
+            self.document_norm[doc_id] = math.sqrt(norm)
         
 class RankingModel():
     @abstractmethod
@@ -97,10 +111,24 @@ class VectorRankingModel(RankingModel):
     def get_ordered_docs(self,query:Mapping[str,TermOccurrence],
                               docs_occur_per_term:Mapping[str,List[TermOccurrence]]) -> (List[int], Mapping[int,float]):
             documents_weight = {}
+            documents_norm = self.idx_pre_comp_vals.document_norm
 
+            for term, query_occur in query.items():
+                if term not in docs_occur_per_term.keys():
+                    continue
 
+                docs_occur = docs_occur_per_term[term]
+                num_docs_with_term = len(docs_occur)
+                Wiq = VectorRankingModel.tf_idf(self.idx_pre_comp_vals.doc_count, query_occur.term_freq, num_docs_with_term)
 
+                for occur in docs_occur:
+                    doc_id = occur.doc_id
+                    if doc_id not in documents_weight.keys():
+                        documents_weight[doc_id] = 0
+                    documents_weight[doc_id] += Wiq * VectorRankingModel.tf_idf(self.idx_pre_comp_vals.doc_count, occur.term_freq, num_docs_with_term)
 
+            for doc in documents_weight.keys():
+                documents_weight[doc] = documents_weight[doc] / documents_norm[doc]
 
             #retona a lista de doc ids ordenados de acordo com o TF IDF
             return self.rank_document_ids(documents_weight),documents_weight
