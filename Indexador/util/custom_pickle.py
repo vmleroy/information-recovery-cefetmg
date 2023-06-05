@@ -17,3 +17,6 @@ def renamed_load(file_obj):
 def renamed_loads(pickled_bytes):
     file_obj = io.BytesIO(pickled_bytes)
     return renamed_load(file_obj)
+ 
+
+# Test comment
