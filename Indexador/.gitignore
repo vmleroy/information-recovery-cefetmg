@@ -4,7 +4,7 @@ embeddings.txt
 *.idx
 .idea
 
-data/*
+data/wiki-pages/*
 __pycache__/
 *.py[cod]
 *.pyc
