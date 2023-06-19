@@ -20,8 +20,7 @@ class QueryRunner:
 
 		"""
 		dic_relevance_docs = {}
-		print(os.listdir("relevant_docs"))
-		for arquiv in ["belo_horizonte","irlanda","sao_paulo"]:
+		for arquiv in os.listdir("relevant_docs"):
 			with open(f"relevant_docs/{arquiv}.dat") as arq:
 				dic_relevance_docs[arquiv] = set(arq.readline().split(","))
 		return dic_relevance_docs
