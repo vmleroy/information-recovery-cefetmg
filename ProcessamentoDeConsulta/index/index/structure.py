@@ -4,11 +4,11 @@ from abc import abstractmethod
 from functools import total_ordering
 from os import path
 try:
-    from util import custom_pickle
+    from index.util import custom_pickle
 except ModuleNotFoundError:
     import sys
     sys.path.append(path.dirname(path.dirname(path.abspath(__file__))))
-    from util import custom_pickle
+    from index.util import custom_pickle
 import os
 import pickle
 import gc

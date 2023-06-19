@@ -1,5 +1,5 @@
 from query.ranking_models import IndexPreComputedVals,VectorRankingModel,BooleanRankingModel,  OPERATOR
-from Indexador.index.structure import HashIndex,FileIndex,TermOccurrence
+from index.index.structure import HashIndex,FileIndex,TermOccurrence
 import unittest
 
 class RankingModelTest(unittest.TestCase):

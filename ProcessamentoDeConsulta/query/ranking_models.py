@@ -1,7 +1,7 @@
 from typing import List
 from abc import abstractmethod
 from typing import List, Set,Mapping
-from Indexador.index.structure import TermOccurrence
+from index.index.structure import TermOccurrence
 import math
 from enum import Enum
 
@@ -108,28 +108,27 @@ class VectorRankingModel(RankingModel):
         #print(f"TF:{tf} IDF:{idf} n_i: {num_docs_with_term} N: {doc_count}")
         return tf*idf
 
-    def get_ordered_docs(self,query:Mapping[str,TermOccurrence],
-                              docs_occur_per_term:Mapping[str,List[TermOccurrence]]) -> (List[int], Mapping[int,float]):
-            documents_weight = {}
-            documents_norm = self.idx_pre_comp_vals.document_norm
+    def get_ordered_docs(self,query:Mapping[str,TermOccurrence], docs_occur_per_term:Mapping[str,List[TermOccurrence]]) -> (List[int], Mapping[int,float]):
+        documents_weight = {}
+        documents_norm = self.idx_pre_comp_vals.document_norm
 
-            for term, query_occurrence in query.items():
-                if term not in docs_occur_per_term.keys():
-                    continue
+        for term, query_occurrence in query.items():
+            if term not in docs_occur_per_term.keys():
+                continue
+            
+            docs_occurrence = docs_occur_per_term[term]
+            num_docs_with_term = len(docs_occurrence)
+            Wiq = VectorRankingModel.tf_idf(self.idx_pre_comp_vals.doc_count, query_occurrence.term_freq, num_docs_with_term)
 
-                docs_occurrence = docs_occur_per_term[term]
-                num_docs_with_term = len(docs_occurrence)
-                Wiq = VectorRankingModel.tf_idf(self.idx_pre_comp_vals.doc_count, query_occurrence.term_freq, num_docs_with_term)
+            for occur in docs_occurrence:
+                doc_id = occur.doc_id
+                if doc_id not in documents_weight.keys():
+                    documents_weight[doc_id] = 0
+                documents_weight[doc_id] += Wiq * VectorRankingModel.tf_idf(self.idx_pre_comp_vals.doc_count, occur.term_freq, num_docs_with_term)
 
-                for occur in docs_occurrence:
-                    doc_id = occur.doc_id
-                    if doc_id not in documents_weight.keys():
-                        documents_weight[doc_id] = 0
-                    documents_weight[doc_id] += Wiq * VectorRankingModel.tf_idf(self.idx_pre_comp_vals.doc_count, occur.term_freq, num_docs_with_term)
+        for doc in documents_weight.keys():
+            documents_weight[doc] = documents_weight[doc] / documents_norm[doc]
 
-            for doc in documents_weight.keys():
-                documents_weight[doc] = documents_weight[doc] / documents_norm[doc]
-
-            #retona a lista de doc ids ordenados de acordo com o TF IDF
-            return self.rank_document_ids(documents_weight),documents_weight
+        #retona a lista de doc ids ordenados de acordo com o TF IDF
+        return self.rank_document_ids(documents_weight), documents_weight
 

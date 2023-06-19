@@ -1,6 +1,6 @@
-from Indexador.index.structure import FileIndex,TermOccurrence
 from query.processing import QueryRunner, VectorRankingModel, IndexPreComputedVals
-from Indexador.index.indexer import Cleaner
+from index.index.structure import FileIndex,TermOccurrence
+from index.index.indexer import Cleaner
 from typing import Mapping
 import unittest
 class ProcessingTest(unittest.TestCase):

@@ -5,7 +5,7 @@ class RenameUnpickler(pickle.Unpickler):
     def find_class(self, module, name):
         renamed_module = module
         if module == "structure":
-            renamed_module = "index.structure"
+            renamed_module = "index.index.structure"
 
         return super(RenameUnpickler, self).find_class(renamed_module, name)
 
@@ -17,6 +17,3 @@ def renamed_load(file_obj):
 def renamed_loads(pickled_bytes):
     file_obj = io.BytesIO(pickled_bytes)
     return renamed_load(file_obj)
- 
-
-# Test comment
