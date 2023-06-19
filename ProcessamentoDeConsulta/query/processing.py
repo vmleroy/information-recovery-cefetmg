@@ -21,8 +21,9 @@ class QueryRunner:
 		"""
 		dic_relevance_docs = {}
 		for arquiv in os.listdir("relevant_docs"):
-			with open(f"relevant_docs/{arquiv}.dat") as arq:
-				dic_relevance_docs[arquiv] = set(arq.readline().split(","))
+			if (arquiv.endswith(".dat")):
+				with open(f"relevant_docs/{arquiv}") as arq:
+					dic_relevance_docs[arquiv.replace(".dat", "")] = set(arq.readline().split(","))
 		return dic_relevance_docs
 
 	def count_topn_relevant(self,n:int,respostas:List[int],doc_relevantes:Set[int]) -> int:

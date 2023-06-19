@@ -21,6 +21,7 @@ class ProcessingTest(unittest.TestCase):
                         perform_stemming=False)
         precomp = IndexPreComputedVals(self.index)
         self.queryRunner = QueryRunner(VectorRankingModel(precomp), self.index, cleaner)
+
     def test_count_top_n_relevant(self):
         arr_lists = [[1,2,3,4,5,30,23,234,32,32,3,2,10,20],
                     [-1,-2,-2],
@@ -38,6 +39,7 @@ class ProcessingTest(unittest.TestCase):
             for i,resp_esperada in enumerate(arr_resp_esperada):
                 resposta = self.queryRunner.count_topn_relevant(n, arr_lists[i], set_relevantes)
                 self.assertEqual(resp_esperada, resposta, msg=f"# de relevantes esperadas top {n}: {resp_esperada} resposta obtida: {resposta}")
+
     def test_precision_recall(self):
         lst_docs = [1,2,3,4,5,6,7,9,11]
         relevant_docs = {1,3,5,7}
@@ -47,6 +49,7 @@ class ProcessingTest(unittest.TestCase):
         
         self.assertAlmostEqual(precisao, precisao_esperada, places=2,msg=f"Valor incorreto de precisão")
         self.assertAlmostEqual(revocacao, revocacao_esperada, places=2,msg=f"Valor incorreto de revocação")
+
     def check_terms_index(self,response:Mapping,expected_response:Mapping):
         #verifica se há algum termo faltando ou sobrando
         set_faltando = set(expected_response.keys())-set(response.keys())
@@ -140,6 +143,12 @@ class ProcessingTest(unittest.TestCase):
             print(f"Pesos dos documento da consulta '{query}': {pesos}")
             print()
             self.assertListEqual(resposta, arr_expected_response[i],f"A resposta a consulta '{query}' deveria ser {arr_expected_response[i]} e não {resposta}")
+
+    def test_get_relevance_per_query(self):
+        result = self.queryRunner.get_relevance_per_query()
+        print(result)
+        
+        
 
 if __name__ == "__main__":
     unittest.main()
