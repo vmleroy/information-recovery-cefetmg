@@ -55,6 +55,25 @@ class QueryRunner:
 		"""
 		#print(self.index)
 		map_term_occur = {}
+		dic_count = {}
+
+		text = self.cleaner.preprocess_text(query)
+		text = word_tokenize(text, language="portuguese")
+
+		# Consulta da frequencia de cada termo na consulta
+		for token in text: 	
+			term = self.cleaner.preprocess_word(token)
+			if term is not None:
+				if term not in dic_count:
+					dic_count[term] = 0
+				dic_count[term] += 1
+
+		# Criação do dicionario de ocorrencia de cada termo presente na consulta
+		for term, count in dic_count.items():
+			occurrence_list = self.index.get_occurrence_list(term)
+			if occurrence_list:
+				map_term_occur[term] = TermOccurrence(None, self.index.get_term_id(term), count)
+				
 		return map_term_occur
 
 	def get_occurrence_list_per_term(self, terms:List) -> Mapping[str, List[TermOccurrence]]:
