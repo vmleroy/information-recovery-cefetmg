@@ -1,7 +1,7 @@
 from typing import List
 from abc import abstractmethod
 from typing import List, Set,Mapping
-from index.structure import TermOccurrence
+from Indexador.index.structure import TermOccurrence
 import math
 from enum import Enum
 

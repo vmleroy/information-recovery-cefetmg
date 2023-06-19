@@ -46,9 +46,9 @@ class Cleaner:
         return term.translate(self.accents_translation_table)
 
     def preprocess_word(self, term: str) -> str or None:
-        if self.perform_stop_words_removal and self.is_stop_word(term):
-            return None
         if term in self.set_punctuation:
+            return None
+        if self.perform_stop_words_removal and self.is_stop_word(term):
             return None
         if self.perform_stemming:
             term = self.word_stem(term)

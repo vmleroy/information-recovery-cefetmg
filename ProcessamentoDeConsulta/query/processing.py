@@ -1,9 +1,10 @@
+import os
 from typing import List, Set,Mapping
 from nltk.tokenize import word_tokenize
 from util.time import CheckTime
 from query.ranking_models import RankingModel,VectorRankingModel, IndexPreComputedVals
-from index.structure import Index, TermOccurrence
-from index.indexer import Cleaner
+from Indexador.index.structure import Index, TermOccurrence
+from Indexador.index.indexer import Cleaner
 
 class QueryRunner:
 	def __init__(self,ranking_model:RankingModel,index:Index, cleaner:Cleaner):
@@ -19,6 +20,7 @@ class QueryRunner:
 
 		"""
 		dic_relevance_docs = {}
+		print(os.listdir("relevant_docs"))
 		for arquiv in ["belo_horizonte","irlanda","sao_paulo"]:
 			with open(f"relevant_docs/{arquiv}.dat") as arq:
 				dic_relevance_docs[arquiv] = set(arq.readline().split(","))
@@ -42,7 +44,7 @@ class QueryRunner:
 		recall = None
 		return precision, recall
     
-    def get_query_term_occurence(self, query:str) -> Mapping[str,TermOccurrence]:
+	def get_query_term_occurence(self, query:str) -> Mapping[str,TermOccurrence]:
 		"""
 			Preprocesse a consulta da mesma forma que foi preprocessado o texto do documento (use a classe Cleaner para isso).
 			E transforme a consulta em um dicionario em que a chave é o termo que ocorreu
@@ -52,9 +54,6 @@ class QueryRunner:
 		"""
 		#print(self.index)
 		map_term_occur = {}
-
-
-
 		return map_term_occur
 
 	def get_occurrence_list_per_term(self, terms:List) -> Mapping[str, List[TermOccurrence]]:
@@ -62,10 +61,8 @@ class QueryRunner:
 			Retorna dicionario a lista de ocorrencia no indice de cada termo passado como parametro.
 			Caso o termo nao exista, este termo possuirá uma lista vazia
 		"""
-
-
-
 		return dic_terms
+
 	def get_docs_term(self, query:str) -> List[int]:
 		"""
 			A partir do indice, retorna a lista de ids de documentos desta consulta
@@ -141,4 +138,4 @@ class QueryRunner:
 		print("Fazendo query...")
 		#aquui, peça para o usuário uma query (voce pode deixar isso num while ou fazer um interface grafica se estiver bastante animado ;)
 		query = "São Paulo";
-		runQuery(query,idx, idxPreCom,mapRelevances);
+		runQuery(query,idx, idxPreCom, mapRelevances)
