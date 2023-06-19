@@ -135,9 +135,11 @@ class SchedulerTest(unittest.TestCase):
     def test_can_fetch(self):
         obj_url_not_allowed = urlparse('https://www.globo.com/beta/dasdas')
         obj_url_allowed = urlparse('https://www.terra.com/index.html')
+        obj_url_no_robotstxt = urlparse('https://www.uai.com.br/entretenimento/')
 
         bol_not_allowed = self.scheduler.can_fetch_page(obj_url_not_allowed)
         bol_allowed = self.scheduler.can_fetch_page(obj_url_allowed)
+        bol_no_robotstxt = self.scheduler.can_fetch_page(obj_url_no_robotstxt)
 
         self.assertTrue(obj_url_not_allowed.netloc in self.scheduler.dic_robots_per_domain,
                         msg=f"O domínio '{obj_url_not_allowed.netloc}' não foi encontrado")
@@ -148,6 +150,8 @@ class SchedulerTest(unittest.TestCase):
                         f"Não deveria ser permitida requisitar a url {obj_url_not_allowed.geturl()} segundo o robots.txt  do dominio {obj_url_not_allowed.netloc}, porém o método can_fetch_page retornou True")
         self.assertTrue(bol_allowed,
                         f"Deveria ser permitida requisitar a url {obj_url_allowed.geturl()} segundo o robots.txt do dominio {obj_url_allowed.netloc}, porém o método can_fetch_page retornou False")
+        self.assertTrue(bol_no_robotstxt,
+                        f"Deveria ser permitida requisitar a url {obj_url_no_robotstxt.geturl()} uma vez que o dominio {obj_url_no_robotstxt.netloc} não possui o arquivo robots.txt")
 
         # verifica se foi adicionado a globo.com
         self.assertTrue(obj_url_allowed.netloc in self.scheduler.dic_robots_per_domain,
