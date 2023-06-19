@@ -34,14 +34,15 @@ class QueryRunner:
 		"""
 		#print(f"Respostas: {respostas} doc_relevantes: {doc_relevantes}")
 		relevance_count = 0
-        
-
+		for doc in doc_relevantes:
+			if doc in respostas[:n]:
+				relevance_count += 1
 		return relevance_count
 
 	def compute_precision_recall(self, n:int, lst_docs:List[int],relevant_docs:Set[int]) -> (float,float):
 		
-		precision = None
-		recall = None
+		precision = abs(self.count_topn_relevant(n,lst_docs,relevant_docs)/n)
+		recall = abs(self.count_topn_relevant(n,lst_docs,relevant_docs)/len(relevant_docs))
 		return precision, recall
     
 	def get_query_term_occurence(self, query:str) -> Mapping[str,TermOccurrence]:
