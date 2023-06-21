@@ -3,7 +3,7 @@ import os
 from typing import List, Set,Mapping
 from nltk.tokenize import word_tokenize
 from util.time import CheckTime
-from query.ranking_models import RankingModel, VectorRankingModel, IndexPreComputedVals
+from query.ranking_models import RankingModel, VectorRankingModel, IndexPreComputedVals, BooleanRankingModel, OPERATOR
 from index.index.structure import Index, TermOccurrence
 from index.index.indexer import Cleaner
 
@@ -118,7 +118,7 @@ class QueryRunner:
 		"""
 			Para um daterminada consulta `query` é extraído do indice `index` os documentos mais relevantes, considerando 
 			um modelo informado pelo usuário. O `indice_pre_computado` possui valores précalculados que auxiliarão na tarefa. 
-			Além disso, para algumas consultas, é impresso a precisão e revocação nos top 5, 10, 20 e 50. Essas consultas estão
+			Além disso, para algumas consultas, é impresso a precisão e revocaçãoVectorRankingModel nos top 5, 10, 20 e 50. Essas consultas estão
 			Especificadas em `map_relevantes` em que a chave é a consulta e o valor é o conjunto de ids de documentos relevantes
 			para esta consulta.
 		"""
@@ -127,7 +127,16 @@ class QueryRunner:
 		#PEça para usuario selecionar entre Booleano ou modelo vetorial para intanciar o QueryRunner
 		#apropriadamente. NO caso do booleano, vc deve pedir ao usuario se será um "and" ou "or" entre os termos.
 		#abaixo, existem exemplos fixos.
-		qr = QueryRunner(VectorRankingModel(indice_pre_computado), indice, cleaner)
+		qr = None
+		modelo = int(input("Digite o número do modelo escolhido -> 1: Booleano, 2: Vetorial"))
+		if modelo == 1:
+			tipo_operacao = int(input("Digite o número do tipo de operação escolhido -> 1: AND, 2: OR"))
+			if tipo_operacao == 1:
+				qr = QueryRunner(BooleanRankingModel(OPERATOR.AND), indice, cleaner)
+			else:
+				qr = QueryRunner(BooleanRankingModel(OPERATOR.OR), indice, cleaner)
+		else:
+			qr = QueryRunner(VectorRankingModel(indice_pre_computado), indice, cleaner)
 		time_checker.print_delta("Query Creation")
 
 		query = cleaner.preprocess_text(query)
@@ -135,7 +144,7 @@ class QueryRunner:
 
 		#Utilize o método get_docs_term para obter a lista de documentos que responde esta consulta
 		resposta = qr.get_docs_term(query)
-		resposta = resposta[0]
+		resposta = list(resposta[0])
 		# print(f"Resposta: {resposta}")
 		time_checker.print_delta(f"anwered with {len(resposta)} docs")
 
@@ -202,9 +211,9 @@ class QueryRunner:
 		# query = "São Paulo"
 		while True:
 			print("\n===========================================")
-			opcao = int(input('Voce deseja fazer uma consulta?\n (1) SIM\n (2) NAO\n  Sua resposta: '))
+			opcao = int(input('Voce deseja fazer uma consulta? -> 1: SIM, 2: NAO'))
 			if(opcao == 1):
-				query = input('  Digite a query: ')
+				query = input('Digite a query: ')
 				print(f"Fazendo query de '{query}'...")
 				result = QueryRunner.runQuery(query, indexPreCom, index, cleaner, map_relevance)
 				print(f"\nTop 10:")
