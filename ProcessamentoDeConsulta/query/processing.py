@@ -1,12 +1,15 @@
 import datetime
 import pickle
 import os
+
 from typing import List, Set,Mapping
 from nltk.tokenize import word_tokenize
 from util.time import CheckTime
-from query.ranking_models import RankingModel, VectorRankingModel, IndexPreComputedVals, BooleanRankingModel, OPERATOR
+
 from index.index.structure import Index, TermOccurrence
 from index.index.indexer import Cleaner
+from query.ranking_models import RankingModel, VectorRankingModel, IndexPreComputedVals, BooleanRankingModel, OPERATOR
+from query.relatorio import plot_precision_recall
 
 class QueryRunner:
 	def __init__(self,ranking_model:RankingModel, index:Index, cleaner:Cleaner):
@@ -155,7 +158,9 @@ class QueryRunner:
 		#nesse if, vc irá verificar se o termo possui documentos relevantes associados a ele
 		#se possuir, vc deverá calcular a Precisao e revocação nos top 5, 10, 20, 50.
 		#O for que fiz abaixo é só uma sugestao e o metododo countTopNRelevants podera auxiliar no calculo da revocacao e precisao
-		arr_precisao_revocao = []
+		arr_precisao = []
+		arr_revocacao = []
+		# arr_precisao_revocao = []
 		if(True and joined_query in map_relevantes.keys()):
 			doc_relervantes = map_relevantes[joined_query]
 			arr_top = [5,10,20,50]
@@ -163,11 +168,15 @@ class QueryRunner:
 			revocacao = 0
 			for n in arr_top:
 				precisao, revocacao = qr.compute_precision_recall(n, resposta, doc_relervantes)
-				arr_precisao_revocao.append({"precisao": precisao, "revocacao": revocacao})
+				arr_precisao.append(precisao)
+				arr_revocacao.append(revocacao)
+				# arr_precisao_revocao.append({"precisao": precisao, "revocacao": revocacao})
 				print(f"Precisao @{n}: {precisao}")
 				print(f"Recall @{n}: {revocacao}")
 		else:
 			print("Consulta sem documentos no mapeamento de relevantes")
+
+		plot_precision_recall(query, arr_top, arr_precisao, arr_revocacao)
 
 		#imprima aas top 10 respostas
 		top_10 = resposta[:10]
@@ -176,7 +185,7 @@ class QueryRunner:
 		bottom_10 = resposta[-10:]
 		bottom_10.reverse()
 
-		return top_10, bottom_10, arr_precisao_revocao
+		return top_10, bottom_10, (arr_precisao, arr_revocacao)
 
 
 	@staticmethod

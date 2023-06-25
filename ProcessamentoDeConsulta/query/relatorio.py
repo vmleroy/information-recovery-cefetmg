@@ -1,16 +1,24 @@
-import pickle
-import os
-import datetime
-import math
-
-from typing import List, Set,Mapping
-from nltk.tokenize import word_tokenize
+from typing import List
 import matplotlib.pyplot as plt
 
-from index.index.indexer import Cleaner
-from index.index.structure import Index, TermOccurrence
-from query.processing import QueryRunner
-from query.ranking_models import RankingModel, VectorRankingModel, IndexPreComputedVals, BooleanRankingModel, OPERATOR
+from index.index.structure import Index
+from query.ranking_models import VectorRankingModel
+
+
+def plot_precision_recall(query: str, arr_top: List[int], arr_precision: List[float], arr_recall: List[float]) -> None:
+  plt.plot(arr_top, arr_precision, marker=".", label="Precision")
+  plt.plot(arr_top, arr_recall, marker="x", label="Recall")
+  plt.title(f"Precision and Recal of query: '{query}'")
+  plt.xlabel("N docs")
+  plt.ylabel("Metric")
+  plt.legend()
+  plt.show()
+  plt.close()
+  plt.plot(arr_recall, arr_precision, marker="*", color="red")
+  plt.title(f"Precision X Recal of query: '{query}'")
+  plt.xlabel("Recall")
+  plt.ylabel("Precision")
+  plt.show()
 
 
 def plot_terms_freq(term_freq_list: List[int]):
