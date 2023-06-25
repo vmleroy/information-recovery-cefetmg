@@ -6,9 +6,10 @@ import math
 from enum import Enum
 
 class IndexPreComputedVals():
-    def __init__(self,index):
+    def __init__(self,index, skipPreCompute=False):
         self.index = index
-        self.precompute_vals()
+        if not skipPreCompute:
+            self.precompute_vals()
 
     def precompute_vals(self):
         """

@@ -25,7 +25,8 @@ class QueryRunner:
 		for arquiv in os.listdir("relevant_docs"):
 			if (arquiv.endswith(".dat")):
 				with open(f"relevant_docs/{arquiv}") as arq:
-					dic_relevance_docs[arquiv.replace(".dat", "")] = set(arq.readline().split(","))
+					arr = [int(s) for s in arq.readline().split(",")]
+					dic_relevance_docs[arquiv.replace(".dat", "")] = set(arr)
 		return dic_relevance_docs
 
 	def count_topn_relevant(self,n:int,respostas:List[int],doc_relevantes:Set[int]) -> int:
@@ -34,7 +35,6 @@ class QueryRunner:
 		Considere que respostas já é a lista de respostas ordenadas por um método de processamento de consulta (BM25, Modelo vetorial).
 		Os documentos relevantes estão no parametro docRelevantes
 		"""
-		#print(f"Respostas: {respostas} doc_relevantes: {doc_relevantes}")
 		relevance_count = 0
 		for doc in doc_relevantes:
 			if doc in respostas[:n]:
@@ -128,16 +128,19 @@ class QueryRunner:
 		#apropriadamente. NO caso do booleano, vc deve pedir ao usuario se será um "and" ou "or" entre os termos.
 		#abaixo, existem exemplos fixos.
 		qr = None
-		modelo = int(input("Digite o número do modelo escolhido -> 1: Booleano, 2: Vetorial"))
+		modelo = int(input("Digite o número do modelo escolhido -> 1: Booleano, 2: Vetorial\nResposta: "))
 		if modelo == 1:
-			tipo_operacao = int(input("Digite o número do tipo de operação escolhido -> 1: AND, 2: OR"))
+			tipo_operacao = int(input("Digite o número do tipo de operação escolhido -> 1: AND, 2: OR\nResposta: "))
 			if tipo_operacao == 1:
+				print("Modelo Booleano AND escolhido")
 				qr = QueryRunner(BooleanRankingModel(OPERATOR.AND), indice, cleaner)
 			else:
+				print("Modelo Booleano OR escolhido")
 				qr = QueryRunner(BooleanRankingModel(OPERATOR.OR), indice, cleaner)
 		else:
+			print("Modelo Vetorial escolhido")
 			qr = QueryRunner(VectorRankingModel(indice_pre_computado), indice, cleaner)
-		time_checker.print_delta("Query Creation")
+		time_checker.print_delta("\nQuery Creation")
 
 		query = cleaner.preprocess_text(query)
 		joined_query = query.replace(" ", "_")
@@ -146,13 +149,13 @@ class QueryRunner:
 		resposta = qr.get_docs_term(query)
 		resposta = list(resposta[0])
 		# print(f"Resposta: {resposta}")
-		time_checker.print_delta(f"anwered with {len(resposta)} docs")
+		time_checker.print_delta(f"anwered with {len(resposta)} docs\n")
 
 		#nesse if, vc irá verificar se o termo possui documentos relevantes associados a ele
 		#se possuir, vc deverá calcular a Precisao e revocação nos top 5, 10, 20, 50.
 		#O for que fiz abaixo é só uma sugestao e o metododo countTopNRelevants podera auxiliar no calculo da revocacao e precisao
 		arr_precisao_revocao = []
-		if(True):
+		if(True and joined_query in map_relevantes.keys()):
 			doc_relervantes = map_relevantes[joined_query]
 			arr_top = [5,10,20,50]
 			precisao = 0
@@ -162,6 +165,8 @@ class QueryRunner:
 				arr_precisao_revocao.append({"precisao": precisao, "revocacao": revocacao})
 				print(f"Precisao @{n}: {precisao}")
 				print(f"Recall @{n}: {revocacao}")
+		else:
+			print("Consulta sem documentos no mapeamento de relevantes")
 
 		#imprima aas top 10 respostas
 		top_10 = resposta[:10]
@@ -211,7 +216,7 @@ class QueryRunner:
 		# query = "São Paulo"
 		while True:
 			print("\n===========================================")
-			opcao = int(input('Voce deseja fazer uma consulta? -> 1: SIM, 2: NAO'))
+			opcao = int(input('Voce deseja fazer uma consulta? -> 1: SIM, 2: NAO\nResposta: '))
 			if(opcao == 1):
 				query = input('Digite a query: ')
 				print(f"Fazendo query de '{query}'...")
