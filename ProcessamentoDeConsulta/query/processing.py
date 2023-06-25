@@ -118,7 +118,7 @@ class QueryRunner:
 		return self.ranking_model.get_ordered_docs(dic_query_occur, dic_occur_per_term_query)
 
 	@staticmethod
-	def runQuery(query:str, indice_pre_computado:IndexPreComputedVals, indice:Index, cleaner: Cleaner, map_relevantes:Mapping[str,Set[int]]):
+	def runQuery(query:str, indice_pre_computado:IndexPreComputedVals, indice:Index, cleaner: Cleaner, map_relevantes:Mapping[str,Set[int]], plotPrecisionRecall=False):
 		"""
 			Para um daterminada consulta `query` é extraído do indice `index` os documentos mais relevantes, considerando 
 			um modelo informado pelo usuário. O `indice_pre_computado` possui valores précalculados que auxiliarão na tarefa. 
@@ -176,7 +176,8 @@ class QueryRunner:
 		else:
 			print("Consulta sem documentos no mapeamento de relevantes")
 
-		plot_precision_recall(query, arr_top, arr_precisao, arr_revocacao)
+		if (plotPrecisionRecall):
+			plot_precision_recall(query, arr_top, arr_precisao, arr_revocacao)
 
 		#imprima aas top 10 respostas
 		top_10 = resposta[:10]
@@ -189,7 +190,7 @@ class QueryRunner:
 
 
 	@staticmethod
-	def main(returnValue=False):
+	def main(returnValue=False, plotPrecisionRecall=False):
 
 		dict_title_docs = {}
 		with open("titlePerDoc.dat", encoding="utf8") as arq:
@@ -236,7 +237,7 @@ class QueryRunner:
 			if(opcao == 1):
 				query = input('Digite a query: ')
 				print(f"Fazendo query de '{query}'...")
-				result = QueryRunner.runQuery(query, indexPreCom, index, cleaner, map_relevance)
+				result = QueryRunner.runQuery(query, indexPreCom, index, cleaner, map_relevance, plotPrecisionRecall)
 				print(f"\nTop 10:")
 				for doc in result[0]:
 					print(f"{doc}: {dict_title_docs[doc]}")
