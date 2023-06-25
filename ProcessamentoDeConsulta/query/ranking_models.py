@@ -19,6 +19,7 @@ class IndexPreComputedVals():
         """
         self.document_norm = {}
         self.doc_count = self.index.document_count
+        self.term_freq = []
 
         dictionary = self.index.dic_index
         doc_count = len(self.index.set_documents)
@@ -26,12 +27,17 @@ class IndexPreComputedVals():
         for term, lst_occurrences in dictionary.items():
             occurrence_list = self.index.get_occurrence_list(term)
             num_docs_with_term = len(occurrence_list)
+            term_count = 0
             for occurrence in occurrence_list:
                 doc_id = occurrence.doc_id
                 if doc_id not in self.document_norm.keys():
                     self.document_norm[doc_id] = 0
                 self.document_norm[doc_id] += math.pow(VectorRankingModel.tf_idf(doc_count, occurrence.term_freq, num_docs_with_term), 2)
+                term_count += occurrence.term_freq
+            self.term_freq.append((term_count, term))
         
+        self.term_freq.sort(reverse=True)
+
         for doc_id, norm in self.document_norm.items():
             self.document_norm[doc_id] = math.sqrt(norm)
         

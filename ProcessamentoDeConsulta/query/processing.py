@@ -1,4 +1,5 @@
 import datetime
+import pickle
 import os
 from typing import List, Set,Mapping
 from nltk.tokenize import word_tokenize
@@ -179,7 +180,7 @@ class QueryRunner:
 
 
 	@staticmethod
-	def main():
+	def main(returnValue=False):
 
 		dict_title_docs = {}
 		with open("titlePerDoc.dat", encoding="utf8") as arq:
@@ -200,8 +201,14 @@ class QueryRunner:
       
 		indexPreCom = IndexPreComputedVals(index)
 
+		# if os.path.exists('pre_compute.idx'):
+		# 	with open('pre_compute.idx', 'rb') as f: indexPreCom = pickle.load(f)
+		# else:
+		# 	indexPreCom = IndexPreComputedVals(index)
+		# 	with open('pre_compute.idx', 'wb') as f: pickle.dump(indexPreCom, f)
+		
 		check_time.print_delta("Precomputou valores")
-
+		
 		#Instanciando o cleaner
 		cleaner = Cleaner(stop_words_file="stopwords2.txt",language="portuguese",
                       perform_stop_words_removal=True,perform_accents_removal=True,
@@ -231,5 +238,8 @@ class QueryRunner:
 			else:
 				print("  Saindo...")
 				break
+		
+		if (returnValue):
+			return index, indexPreCom, cleaner, map_relevance
 			
 			
